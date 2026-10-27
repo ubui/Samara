@@ -75,6 +75,18 @@ sudo ./install.sh --port 8080     # 自定义端口
 NSUITE_BRAND="我的NAS" sudo -E ./install.sh   # 安装时自定义面板显示名
 ```
 
+### 一键卸载
+
+```sh
+curl -fsSL https://github.com/ubui/elmsamaras/releases/latest/download/uninstall.sh | sudo bash
+```
+
+局域网内另一台已装机器也可作源：`curl -fsSL http://<面板地址>:8090/uninstall.sh | sudo bash`
+
+卸载内容：停掉并删除 `nsuite.service`、`/opt/nsuite` 程序、cron 任务与登录横幅。
+**配置和数据默认保留**（`/etc/nsuite`、`/var/lib/nsuite`、Samba 共享、`/srv` 下的媒体文件），
+脚本结束时提示如何彻底清除；加 `--purge-containers` 可顺带删除面板部署的 Docker 容器。
+
 ### 其它管道用法
 
 ```sh
@@ -192,12 +204,13 @@ nsuite/
 
 1. 改版本号：`nsuite/__init__.py` 的 `__version__`（面板 `--version`、分发源文件名都取它）
 2. 打包出 `<ver>.tar.gz` 与自解压单文件 `<ver>-install.sh`
-3. 建 Release，**5 个资产名字必须与下表一致**，否则 `releases/latest/download/...` 会断链
+3. 建 Release，**6 个资产名字必须与下表一致**，否则 `releases/latest/download/...` 会断链
 
 | 资产 | 用途 |
 |---|---|
 | `get.sh` | 一键安装入口（`curl … \| sudo bash`） |
 | `install.sh` | 安装脚本本体（自带下载逻辑） |
+| `uninstall.sh` | 一键卸载入口（`curl … \| sudo bash`） |
 | `elmsamaras.tar.gz` | **最新版固定别名**，`latest/download` 靠它指向当前版本 |
 | `elmsamaras-<ver>.tar.gz` | 带版本号的源码包 |
 | `elmsamaras-<ver>-install.sh` | 离线自解压单文件 |
@@ -205,7 +218,7 @@ nsuite/
 ```sh
 gh release create v1.3.0 --repo ubui/elmsamaras --title "elmsamaras 1.3.0" \
   --notes-file notes.md \
-  get.sh install.sh elmsamaras.tar.gz \
+  get.sh install.sh uninstall.sh elmsamaras.tar.gz \
   elmsamaras-1.3.0.tar.gz elmsamaras-1.3.0-install.sh
 ```
 

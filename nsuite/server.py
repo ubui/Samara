@@ -174,7 +174,7 @@ class Handler(BaseHTTPRequestHandler):
 
         # 安装分发：引导脚本 + 发布包。内容是安装程序本身，不含任何用户数据，
         # 因此放在登录校验之前，方便新机器直接 curl | bash 拉取。
-        if path in ("/get.sh", "/install.sh", "/dist", "/dist/") or path.startswith("/dist/"):
+        if path in ("/get.sh", "/install.sh", "/uninstall.sh", "/dist", "/dist/") or path.startswith("/dist/"):
             return self._do_dist(path)
 
         if not self._require_auth():
@@ -657,7 +657,7 @@ class Handler(BaseHTTPRequestHandler):
         dist = self._dist_dir()
         prefix = os.path.dirname(dist)
 
-        if path in ("/get.sh", "/install.sh"):
+        if path in ("/get.sh", "/install.sh", "/uninstall.sh"):
             try:
                 with open(os.path.join(prefix, path.lstrip("/")), "r", encoding="utf-8") as f:
                     text = f.read()
