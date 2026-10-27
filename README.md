@@ -20,6 +20,12 @@
 
 ![通知](screenshots/notify.png)
 
+PWA（可安装到桌面 / 手机主屏）：
+
+| 安装按钮 | 断网提示 | 离线页 |
+|---|---|---|
+| ![安装按钮](screenshots/pwa/install-button.png) | ![断网提示](screenshots/pwa/offline-shell.png) | ![离线页](screenshots/pwa/offline-page.png) |
+
 ## 快速开始
 
 ### 一条命令安装（推荐）
@@ -50,8 +56,8 @@ curl -fsSL http://<已装的机器IP>:8090/get.sh | sudo bash -s -- --full
 ### 离线安装（单文件，源码内嵌）
 
 ```sh
-curl -fsSLO https://github.com/ubui/elmsamaras/releases/latest/download/elmsamaras-1.2.0-install.sh
-chmod +x elmsamaras-1.2.0-install.sh && sudo ./elmsamaras-1.2.0-install.sh
+curl -fsSLO https://github.com/ubui/elmsamaras/releases/latest/download/elmsamaras-1.3.0-install.sh
+chmod +x elmsamaras-1.3.0-install.sh && sudo ./elmsamaras-1.3.0-install.sh
 ```
 
 整个套件（6.2 MB）就在这一个文件里，拷到没有网络的机器上也能装。
@@ -76,7 +82,7 @@ NSUITE_BRAND="我的NAS" sudo -E ./install.sh   # 安装时自定义面板显示
 curl -fsSL https://github.com/ubui/elmsamaras/releases/latest/download/install.sh | sudo bash
 # 指定任意源码包（自建镜像 / 本地文件均可）
 curl -fsSL https://github.com/ubui/elmsamaras/releases/latest/download/install.sh \
-  | sudo bash -s -- --from https://example.com/elmsamaras-1.2.0.tar.gz
+  | sudo bash -s -- --from https://example.com/elmsamaras-1.3.0.tar.gz
 ```
 
 安装完成后访问 `http://<机器IP>:8090`，默认账号 **root / root**（`/etc/nsuite/passwd`）。再次运行安装脚本属于升级，**不会重置你已改过的密码，也不动 SMB 账号与既有共享配置**。
@@ -106,7 +112,7 @@ sudo python3 /opt/nsuite/nsuite/auth_cli.py /etc/nsuite/passwd root 新密码
 7. **备份**：配置打包导出（tar.gz：面板账号 + 共享文件夹 + 计划任务 + Samba 配置）、导入（路径白名单校验，导入前自动快照）、本地快照管理；**自动备份**（按 cron 周期自动快照，超过保留份数自动删旧，失败即通知）
 8. **通知**：Bark（iOS 推送）/ 通用 Webhook / SMTP 邮件三种通道，可多通道并行；按事件开关（备份、硬盘、计划任务、系统与磁盘）；通道级"测试"按钮 + 最近 20 条发送记录。后台每 30 分钟巡检硬盘健康与磁盘用量，同类告警 24 小时内只推一次
 
-另有：日志页（journalctl 系统日志 / 内核日志）。
+另有：日志页（journalctl 系统日志 / 内核日志）。**PWA**：可安装到电脑桌面 / 手机主屏（独立窗口、无地址栏、自己的图标），断网时显示缓存外壳 + 底部提示条，恢复后自动消失；`manifest` 按品牌名动态生成，改名后应用名同步。
 
 ## 实现要点
 
@@ -117,6 +123,7 @@ sudo python3 /opt/nsuite/nsuite/auth_cli.py /etc/nsuite/passwd root 新密码
 - **自动备份**：配置存 `/etc/nsuite/backup.json`，cron 表由面板生成（`/etc/cron.d/nsuite-backup`），执行器 `backup_cli.py --auto` 独立于面板运行（面板挂了也能备份），结果写 `/var/lib/nsuite/backup-status.json`，失败立刻发通知
 - **通知**：配置存 `/etc/nsuite/notify.json`（权限 600），全部标准库实现（`urllib` / `smtplib`）；发送是 best-effort，任何通道异常都不影响主流程；口令只写不读（接口返回 `has_password` 而非明文）
 - **巡检**：`alerts.py` 后台线程每 30 分钟检查 SMART 与磁盘用量，用 `notify.once()` 做 24 小时去重，避免"硬盘有点小毛病"变成每小时一条推送
+- **PWA**：`/manifest.webmanifest`（按 `[branding]` 动态生成）、`/sw.js`（根作用域 + `no-cache`，缓存版本跟随 `__version__`）与 `/offline` 均为认证前公开路由；图标由 `tools/make_pwa_icons.py` 纯标准库生成（深色底 + 橄榄绿 E，含 maskable 版）。Service Worker 策略：页面网络优先→缓存外壳→离线页；`/static/*` 先缓存后更新；`/api/*`、`/dist/*` 永不缓存（断网绝不吐旧数据）；登出时自动清掉页面缓存
 - **升级**：安装脚本会把新版 `apps.json` 里新增的服务条目合并进现有清单（保留你的自定义），systemd → 容器承载的变更会自动同步；cron 执行器内容过期时自动重写
 - **一条命令安装**：`install.sh` 有四层源码定位——当前目录 → 脚本尾部内嵌包 → `--from`/内置地址下载 → 明确报错提示。面板把 `/get.sh`、`/install.sh`、`/dist/*.tar.gz` 作为公开路由提供（安装包本身不含任何用户数据），并按请求 Host 自动注入下载地址，所以装上第一台后，整个局域网都能 `curl | sudo bash`。安装完成后由 `stage_dist()` 把当前版本的包放进 `/opt/nsuite/dist`，这台机器就成了可分发源；临时目录在退出时统一清理
 
@@ -213,3 +220,4 @@ gh release create v1.3.0 --repo ubui/elmsamaras --title "elmsamaras 1.3.0" \
 - Debian 自带的 `smb.conf` 里有 `disable netbios = yes`，因此 `nmbd` 会被 systemd 的 `ExecCondition` 跳过（`is-active` 显示 inactive 属正常）。不影响 `\\IP\share` 访问，只影响"网络邻居里按机器名发现"；需要按名字发现时把该行改 `no` 并 `systemctl restart nmbd`
 - 通知不做重试队列：某次推送失败时详情留在面板"最近通知"里，不会补发历史消息（但硬盘/磁盘告警在发送失败时会撤销去重标记，下一轮巡检会再试）
 - 自动备份只备份**配置**（几百 KB），媒体文件请用 rsync / 快照方案
+- PWA 的 Service Worker 只在安全上下文生效：`https` 或 `http://localhost` / `http://127.0.0.1`。用局域网 IP 走 HTTP 访问时，浏览器会跳过 SW（离线外壳与"安装"提示不可用），但 manifest 与 Apple meta 仍然生效——iPhone Safari 的"添加到主屏幕"以独立窗口打开不受影响；需要完整 PWA 体验时给面板配 HTTPS 反代（或经 SSH 隧道用 localhost 访问）

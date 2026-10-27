@@ -3,9 +3,19 @@
 <head>
 <meta charset="utf-8">
 <title>登录 - {{TITLE}}</title>
-<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" name="viewport" />
+<meta name="theme-color" content="#1b1a17">
+<meta name="color-scheme" content="dark">
+<meta name="application-name" content="{{TITLE}}">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="{{TITLE}}">
+<link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/static/css/style.css?v=1.1">
 <link rel="shortcut icon" href="/static/img/favicon.ico">
+<link rel="apple-touch-icon" href="/static/img/pwa/apple-touch-icon-180.png">
+<script src="/static/js/pwa.js" defer></script>
 <style>
   .background { position: fixed; inset: 0; background-size: cover; background-position: center; }
   .background:after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,.25); }

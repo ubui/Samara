@@ -26,6 +26,7 @@ MIME = {
     ".woff": "font/woff",
     ".woff2": "font/woff2",
     ".ttf": "font/ttf",
+    ".webmanifest": "application/manifest+json",
 }
 
 
@@ -50,7 +51,7 @@ class Context:
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "nsuite/1.2.0"
+    server_version = "nsuite/1.3.0"
     protocol_version = "HTTP/1.1"
 
     # ---------- 基础工具 ----------
@@ -161,6 +162,15 @@ class Handler(BaseHTTPRequestHandler):
 
         if path.startswith("/static/"):
             return self._static(path.lstrip("/"))
+
+        # PWA：manifest 与 Service Worker 不需要登录态（浏览器首次获取时
+        # 用户可能尚未登录），/offline 是无数据静态页，同理放开。
+        if path == "/manifest.webmanifest":
+            return self._manifest()
+        if path == "/sw.js":
+            return self._sw()
+        if path == "/offline":
+            return self._page("offline.html")
 
         # 安装分发：引导脚本 + 发布包。内容是安装程序本身，不含任何用户数据，
         # 因此放在登录校验之前，方便新机器直接 curl | bash 拉取。
@@ -559,6 +569,58 @@ class Handler(BaseHTTPRequestHandler):
         html = (html.replace("{{TITLE}}", self.ctx.title)
                     .replace("{{SUBTITLE}}", self.ctx.subtitle))
         self._send(200, html.encode("utf-8"), "text/html; charset=utf-8")
+
+    # ---------- PWA ----------
+
+    def _manifest(self):
+        title = self.ctx.title
+        manifest = {
+            "id": "/",
+            "name": title,
+            "short_name": title[:12],
+            "description": f"{title} —— {self.ctx.subtitle} NAS 控制面板",
+            "start_url": "/",
+            "scope": "/",
+            "display": "standalone",
+            "display_override": ["standalone", "minimal-ui"],
+            "orientation": "any",
+            "lang": "zh-CN",
+            "dir": "ltr",
+            "background_color": "#14130f",
+            "theme_color": "#1b1a17",
+            "categories": ["utilities", "productivity"],
+            "icons": [
+                {"src": "/static/img/pwa/icon-192.png", "sizes": "192x192",
+                 "type": "image/png", "purpose": "any"},
+                {"src": "/static/img/pwa/icon-512.png", "sizes": "512x512",
+                 "type": "image/png", "purpose": "any"},
+                {"src": "/static/img/pwa/icon-maskable-512.png", "sizes": "512x512",
+                 "type": "image/png", "purpose": "maskable"},
+            ],
+            "shortcuts": [
+                {"name": "状态总览", "url": "/#overview", "icons": [{"src": "/static/img/pwa/icon-192.png", "sizes": "192x192"}]},
+                {"name": "存储与健康", "url": "/#storage", "icons": [{"src": "/static/img/pwa/icon-192.png", "sizes": "192x192"}]},
+                {"name": "备份", "url": "/#backup", "icons": [{"src": "/static/img/pwa/icon-192.png", "sizes": "192x192"}]},
+            ],
+        }
+        body = json.dumps(manifest, ensure_ascii=False).encode("utf-8")
+        self._send(200, body, "application/manifest+json; charset=utf-8",
+                   headers={"Cache-Control": "no-cache"})
+
+    def _sw(self):
+        """Service Worker 必须从根作用域提供且禁缓存，否则更新不生效。"""
+        text = self._read_page("sw.js")
+        if text is None:
+            return self._send(404, b"sw.js missing")
+        text = text.replace("__VERSION__", self._sw_version())
+        self._send(200, text.encode("utf-8"), "application/javascript; charset=utf-8",
+                   headers={"Cache-Control": "no-cache",
+                            "Service-Worker-Allowed": "/"})
+
+    @staticmethod
+    def _sw_version():
+        from . import __version__
+        return __version__
 
     # ---------- 安装分发（引导脚本与发布包） ----------
 
