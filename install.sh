@@ -276,13 +276,14 @@ stage_dist() {
     return 0
   fi
   _dst="$PREFIX/dist/elmsamaras-$_ver.tar.gz"
-  if [ -f "$_dst" ]; then
-    echo "    分发源: elmsamaras-$_ver.tar.gz 已存在"
-    return 0
-  fi
+  # 从下载包安装：这份就是官方原包，总是覆盖（避免同版本号下的旧内容继续分发）
   if [ -n "${FETCHED_TGZ:-}" ] && [ -f "$FETCHED_TGZ" ]; then
     cp "$FETCHED_TGZ" "$_dst"
     echo "    分发源: 已缓存 elmsamaras-$_ver.tar.gz（来自下载包）"
+    return 0
+  fi
+  if [ -f "$_dst" ]; then
+    echo "    分发源: elmsamaras-$_ver.tar.gz 已存在"
     return 0
   fi
   # 源码目录安装：现场打一个，排除缓存目录和 dist 自身
