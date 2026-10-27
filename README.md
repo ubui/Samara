@@ -179,6 +179,31 @@ nsuite/
 
 不建议改内部代号 `nsuite`（路径 `/opt/nsuite`、`/etc/nsuite`、`/var/lib/nsuite`、包名、systemd 单元名都依赖它），改动需要全文替换并重装；显示名场景下完全没有必要。
 
+## 发布新版本
+
+仓库只放源码，安装包走 GitHub Release 资产（`dist/` 已被 `.gitignore` 排除）。发版步骤：
+
+1. 改版本号：`nsuite/__init__.py` 的 `__version__`（面板 `--version`、分发源文件名都取它）
+2. 打包出 `<ver>.tar.gz` 与自解压单文件 `<ver>-install.sh`
+3. 建 Release，**5 个资产名字必须与下表一致**，否则 `releases/latest/download/...` 会断链
+
+| 资产 | 用途 |
+|---|---|
+| `get.sh` | 一键安装入口（`curl … \| sudo bash`） |
+| `install.sh` | 安装脚本本体（自带下载逻辑） |
+| `elmsamaras.tar.gz` | **最新版固定别名**，`latest/download` 靠它指向当前版本 |
+| `elmsamaras-<ver>.tar.gz` | 带版本号的源码包 |
+| `elmsamaras-<ver>-install.sh` | 离线自解压单文件 |
+
+```sh
+gh release create v1.3.0 --repo ubui/elmsamaras --title "elmsamaras 1.3.0" \
+  --notes-file notes.md \
+  get.sh install.sh elmsamaras.tar.gz \
+  elmsamaras-1.3.0.tar.gz elmsamaras-1.3.0-install.sh
+```
+
+安装脚本末尾的 `stage_dist()` 会把本次安装用的包放进 `/opt/nsuite/dist`，所以**装好的机器本身就是局域网分发源**，内网机器无需出网。
+
 ## 已知差异 / 局限
 
 - 原版面板二进制闭源、混淆、带 RSA 签名校验和 Amlogic 硬件检查，无法在 x86 复用；本套件用同主题重写
