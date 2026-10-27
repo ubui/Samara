@@ -709,8 +709,13 @@ function renderApps(apps) {
       '</span></div>';
   }).join("");
 
-  $("quicklinks").innerHTML = apps.filter(a => a.ui && a.active)
-    .map(a => '<a href="' + esc(a.ui) + '" target="_blank" rel="noopener"><button class="label success"><span class="mobile-hide">' + esc(a.name) + '</span></button></a>')
+  // 右上角直达按钮：已安装且有 WebUI 的应用常驻显示（与原版 NDM 一致）
+  // 运行中 = 绿色；已安装未运行 = 灰色（仍可点击，title 提示状态）
+  $("quicklinks").innerHTML = apps.filter(a => a.ui && a.installed)
+    .map(a => '<a href="' + esc(a.ui) + '" target="_blank" rel="noopener" title="'
+              + esc(a.desc || a.name) + (a.active ? '' : '（未运行）')
+              + '"><button class="label ' + (a.active ? 'success' : '') + '">'
+              + '<span class="mobile-hide">' + esc(a.name) + '</span></button></a>')
     .join("");
 
   $("nav-apps").innerHTML = apps.map(a =>
@@ -1563,10 +1568,13 @@ document.querySelectorAll("#tabbar button").forEach(b => {
 
 const initial = (location.hash || "").replace("#", "");
 switchTab(TAB_TITLES[initial] ? initial : "overview");
+loadApps();          // 首屏就渲染右上角直达按钮
 
-// 轮询：只刷新当前分区，避免无谓开销
-setInterval(() => { if (currentTab === "overview" || currentTab === "storage") loadStatus(); }, 3000);
+// 轮询：只刷新当前分区，避免无谓开销；quicklinks（右上角直达按钮）
+// 依赖 /api/apps，全时段低频刷新，不受当前分区限制
+setInterval(loadApps, 10000);
 setInterval(() => { if (currentTab === "services") loadApps(); }, 6000);
+setInterval(() => { if (currentTab === "overview" || currentTab === "storage") loadStatus(); }, 3000);
 setInterval(() => { if (currentTab === "docker") loadDocker(); }, 8000);
 setInterval(() => { if (currentTab === "cron") loadCron(); }, 15000);
 setInterval(() => { if (currentTab === "storage") loadSmart(); }, 60000);
