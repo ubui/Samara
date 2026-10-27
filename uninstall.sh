@@ -22,6 +22,10 @@ fi
 
 rm -rf /opt/nsuite
 rm -f /etc/cron.d/nsuite /etc/cron.d/nsuite-backup
+# 登录横幅：只删带本安装器标记的 motd 文件（品牌名可自定义，不能按固定名删）
+for _f in /etc/profile.d/*-motd.sh; do
+  [ -f "$_f" ] && grep -qs "install.sh 生成" "$_f" && rm -f "$_f"
+done 2>/dev/null || true
 rm -f /usr/local/sbin/nsuite-cron-run /usr/local/sbin/nsuite-container
 rm -rf /etc/nsuite/cron-jobs
 

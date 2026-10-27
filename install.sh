@@ -637,6 +637,44 @@ EOF
   echo "[*] nsuite.service 已启动并设为开机自启"
 fi
 
+# ---------- 登录横幅（仿 fnOS：每次交互登录显示面板地址） ----------
+# 用 profile.d 而不是 /etc/motd：IP/状态每次登录时动态取，DHCP 变了也不会显示旧地址
+_MOTD="/etc/profile.d/${BRAND}-motd.sh"
+cat > "$_MOTD" <<EOF
+# ${BRAND} 登录横幅 —— 由 install.sh 生成；删除本文件即可去掉横幅
+case \$- in *i*) ;; *) return 2>/dev/null || exit 0 ;; esac   # 只在交互式 shell 显示
+[ -r $CONFDIR/nsuite.conf ] || return 2>/dev/null || exit 0
+
+_ns_title=\$(grep -m1 '^title *=' $CONFDIR/nsuite.conf | cut -d= -f2- | sed 's/^ *//;s/ *\$//')
+_ns_port=\$(grep -m1 '^port *=' $CONFDIR/nsuite.conf | cut -d= -f2- | tr -d '[:space:]')
+_ns_ver=\$(sed -n 's/^__version__ = "\(.*\)"/\1/p' $PREFIX/nsuite/__init__.py 2>/dev/null | head -1)
+_ns_ip=\$(hostname -I 2>/dev/null | awk '{print \$1}')
+_ns_state=stopped
+command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet nsuite.service && _ns_state=running
+
+echo
+echo "=============================================================="
+echo
+echo "  \${_ns_title:-$BRAND} v\${_ns_ver:-?} (Debian Edition)"
+echo "  Hostname:    \$(hostname)"
+echo "  IPv4:        \${_ns_ip:-127.0.0.1}"
+echo
+echo "  \${_ns_title:-$BRAND} Web UI can be directly accessed at: http://\${_ns_ip:-127.0.0.1}:\${_ns_port:-8090}"
+if [ "\$_ns_state" = running ]; then
+  echo "  面板状态:    运行中"
+else
+  echo "  面板状态:    未运行（sudo systemctl start nsuite）"
+fi
+echo
+echo "  面板日志:    journalctl -u nsuite -f"
+echo "  文档:        https://github.com/ubui/elmsamaras"
+echo
+echo "=============================================================="
+unset _ns_title _ns_port _ns_ver _ns_ip _ns_state
+EOF
+chmod 644 "$_MOTD"
+echo "[*] 登录横幅已写入 $_MOTD（删除该文件即不再显示）"
+
 # ---------- 手动启动脚本（无 systemd 时） ----------
 cat > "$PREFIX/start.sh" <<EOF
 #!/bin/sh
@@ -665,6 +703,7 @@ if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
 fi
 echo
 echo "  修改面板密码: python3 $PREFIX/nsuite/auth_cli.py $CONFDIR/passwd root 新密码"
+echo "  登录横幅:     每次 SSH/终端登录显示面板地址（/etc/profile.d/${BRAND}-motd.sh，删除即关）"
 echo "  配置备份:     面板 → 备份（导出/导入 tar.gz，含账号/共享/计划任务）"
 echo "  自动备份:     面板 → 备份 → 自动备份（默认每天 03:00，保留 10 份，可在面板关闭）"
 echo "  告警通知:     面板 → 通知（Bark / Webhook / SMTP，硬盘与备份异常主动推送）"
