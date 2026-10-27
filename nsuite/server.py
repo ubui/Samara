@@ -38,7 +38,7 @@ class Context:
         self.password_file = config.get("paths", "password_file", "/etc/nsuite/passwd")
         self.apps_file = config.get("paths", "apps_file", "/etc/nsuite/apps.json")
         self.web_root = config.get("paths", "web_root", "/opt/nsuite/web")
-        self.title = config.get("branding", "title", "elmsamaras")
+        self.title = config.get("branding", "title", "Elmsamaras")
         self.subtitle = config.get("branding", "subtitle", "Debian Edition")
         # 调试开关：同时要求监听回环地址，避免误开到公网
         self.allow_anonymous = (

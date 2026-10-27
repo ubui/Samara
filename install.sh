@@ -38,7 +38,7 @@ GITHUB_FROM='https://github.com/ubui/elmsamaras/releases/latest/download/elmsama
 PAYLOAD_TAG='#__ELMSAMARAS_PAYLOAD__'
 
 PORT=8090
-BRAND="${NSUITE_BRAND:-elmsamaras}"   # 面板显示名，安装时可用 NSUITE_BRAND="xxx" ./install.sh 自定义
+BRAND="${NSUITE_BRAND:-Elmsamaras}"   # 面板显示名，安装时可用 NSUITE_BRAND="xxx" ./install.sh 自定义
 WITH=""
 FULL=0
 DOCKER_MIRROR=""
@@ -301,6 +301,10 @@ stage_dist() {
 stage_dist
 
 # ---------- 生成配置 ----------
+# 老版本默认显示名 elmsamaras → Elmsamaras（仅当用户未自定义品牌时迁移）
+if [ -f "$CONFDIR/nsuite.conf" ] && [ -z "${NSUITE_BRAND:-}" ]; then
+  sed -i 's/^title = elmsamaras$/title = Elmsamaras/' "$CONFDIR/nsuite.conf"
+fi
 if [ ! -f "$CONFDIR/nsuite.conf" ]; then
   cat > "$CONFDIR/nsuite.conf" <<EOF
 [server]
@@ -639,6 +643,12 @@ fi
 
 # ---------- 登录横幅（仿 fnOS：每次交互登录显示面板地址） ----------
 # 用 profile.d 而不是 /etc/motd：IP/状态每次登录时动态取，DHCP 变了也不会显示旧地址
+# 先清掉旧品牌名留下的横幅（带本安装器标记、但文件名与当前品牌不符的），避免双横幅
+for _old in /etc/profile.d/*-motd.sh; do
+  [ -f "$_old" ] || continue
+  [ "$_old" = "/etc/profile.d/${BRAND}-motd.sh" ] && continue
+  grep -qs "install.sh 生成" "$_old" && rm -f "$_old"
+done 2>/dev/null || true
 _MOTD="/etc/profile.d/${BRAND}-motd.sh"
 cat > "$_MOTD" <<EOF
 # ${BRAND} 登录横幅 —— 由 install.sh 生成；删除本文件即可去掉横幅

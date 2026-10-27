@@ -18,7 +18,7 @@ apps_file = /etc/nsuite/apps.json
 web_root = /opt/nsuite/web
 
 [branding]
-title = elmsamaras
+title = Elmsamaras
 subtitle = Debian Edition
 
 # 仅供本地调试/嵌入看板：跳过登录。默认关闭，且仅监听回环地址时生效。

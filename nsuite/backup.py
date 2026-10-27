@@ -307,7 +307,7 @@ def _write_crond(cfg):
             return True, ""
         os.makedirs(os.path.dirname(AUTO_CROND), exist_ok=True)
         body = "\n".join([
-            "# 由 elmsamaras 面板生成 —— 请勿手工编辑，改动会被覆盖",
+            "# 由 Elmsamaras 面板生成 —— 请勿手工编辑，改动会被覆盖",
             "# 管理入口：面板 → 备份 → 自动备份",
             "SHELL=/bin/sh",
             "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",

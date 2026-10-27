@@ -415,7 +415,7 @@ def init_conf(force=False):
     os.makedirs("/etc/samba", exist_ok=True)
     if os.path.exists(CONF) and not force:
         return False
-    brand = "elmsamaras"
+    brand = "Elmsamaras"
     try:
         from .config import Config
         brand = Config().get("branding", "title", brand) or brand

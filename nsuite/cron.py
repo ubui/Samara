@@ -181,7 +181,7 @@ def _write_job_script(jid, command):
 
 
 RUNNER_SCRIPT = """#!/bin/sh
-# elmsamaras cron 执行器：运行任务脚本并记录退出码与输出
+# Elmsamaras cron 执行器：运行任务脚本并记录退出码与输出
 # 用法: nsuite-cron-run <job-id>
 id="$1"
 [ -n "$id" ] || exit 2
@@ -239,7 +239,7 @@ def _ensure_runner():
 
 def _render_crond(items):
     lines = [
-        "# 由 elmsamaras 面板生成 —— 请勿手工编辑，改动会被覆盖",
+        "# 由 Elmsamaras 面板生成 —— 请勿手工编辑，改动会被覆盖",
         "# 管理入口：面板 → 计划任务（或编辑 /etc/nsuite/cron.json）",
         "SHELL=/bin/sh",
         "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",

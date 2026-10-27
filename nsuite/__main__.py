@@ -11,7 +11,7 @@ from . import __version__
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="nsuite", description="elmsamaras 面板（Debian NAS 套件）")
+    ap = argparse.ArgumentParser(prog="nsuite", description="Elmsamaras 面板（Debian NAS 套件）")
     ap.add_argument("--conf", default="/etc/nsuite/nsuite.conf", help="配置文件路径")
     ap.add_argument("--port", type=int, default=None, help="覆盖监听端口")
     ap.add_argument("--listen", default=None, help="覆盖监听地址")
@@ -19,7 +19,7 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     if args.version:
-        print("elmsamaras %s" % __version__)
+        print("Elmsamaras %s" % __version__)
         return 0
 
     cfg = Config(args.conf)

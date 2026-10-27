@@ -318,7 +318,7 @@ def ensure_default():
         "id": uuid.uuid4().hex[:10],
         "name": "share",
         "path": "/srv/share",
-        "comment": "elmsamaras 默认共享",
+        "comment": "Elmsamaras 默认共享",
         "owner": "",
         "group": "",
         "mode": "775",

@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="{{TITLE}}">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="stylesheet" href="/static/css/style.css?v=1.1">
+<link rel="stylesheet" href="/static/css/style.css?v=1.2">
 <link rel="shortcut icon" href="/static/img/favicon.ico">
 <link rel="apple-touch-icon" href="/static/img/pwa/apple-touch-icon-180.png">
 <script src="/static/js/pwa.js" defer></script>
@@ -21,6 +21,12 @@
   body { margin: 0; }
   .slide.open > ul { display: block !important; }
   .slide.open > .menu:after { content: "\e20c"; }
+  .slide > a.menu { cursor: pointer; }
+  /* 手机端：汉堡按钮展开侧边栏 */
+  @media (max-width: 992px) {
+    body.side-open .main-left { width: 15rem; }
+    body.side-open .darkMask { display: block; }
+  }
 
   #maincontent .container { padding-bottom: 40px; }
   .n1-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0 18px; }
@@ -601,6 +607,25 @@ const TAB_TITLES = {
   notify: "通知"
 };
 let currentTab = "overview";
+
+// 侧边栏交互：折叠菜单开合 + 手机端汉堡按钮（原主题菜单 JS 的等效实现）
+document.querySelectorAll(".nav > .slide > a.menu").forEach(function (el) {
+  el.addEventListener("click", function (e) {
+    e.preventDefault();
+    var li = this.parentElement;
+    li.classList.toggle("open");
+    var ul = li.querySelector(".slide-menu");
+    if (ul) ul.classList.toggle("active");
+  });
+});
+var _sideBtn = document.querySelector(".showSide");
+if (_sideBtn) _sideBtn.addEventListener("click", function () {
+  document.body.classList.toggle("side-open");
+});
+var _mask = document.querySelector(".darkMask");
+if (_mask) _mask.addEventListener("click", function () {
+  document.body.classList.remove("side-open");
+});
 
 function switchTab(name) {
   if (!TAB_TITLES[name]) name = "overview";

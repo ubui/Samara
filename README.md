@@ -1,4 +1,4 @@
-# elmsamaras — 轻量 NAS / 下载套件（Debian Edition）
+# Elmsamaras — 轻量 NAS / 下载套件（Debian Edition）
 
 把荒野无灯 N1「小钢炮」的 All-in-One 下载/NAS 体验，移植成 **Debian/Ubuntu 上可一键安装的套件**——类似 OpenMediaVault 的安装方式，但保持小钢炮的轻量（面板纯 Python 标准库，无 Web 框架依赖）。
 
@@ -28,21 +28,34 @@ PWA（可安装到桌面 / 手机主屏）：
 
 ## 快速开始
 
-### 一条命令安装（推荐）
+### 一条命令安装（OMV 同款风格，推荐）
 
 任意 Debian 11 / 12 / **13**、Ubuntu 22.04 / 24.04 机器，root 执行：
 
 ```sh
-curl -fsSL https://github.com/ubui/elmsamaras/releases/latest/download/get.sh | sudo bash
+wget -O - https://raw.githubusercontent.com/ubui/elmsamaras/main/install.sh | sudo bash
 ```
 
 连 Docker + Portainer + Jellyfin + qBittorrent 一起装：
 
 ```sh
-curl -fsSL https://github.com/ubui/elmsamaras/releases/latest/download/get.sh | sudo bash -s -- --full
+wget -O - https://raw.githubusercontent.com/ubui/elmsamaras/main/install.sh | sudo bash -s -- --full
 ```
 
-引导器会自动装 curl、下载源码包、解压、把后续参数原样交给 `install.sh`。**重复执行即升级**，不会重置密码与配置。
+与 OpenMediaVault 的安装脚本同款形式：直接从仓库拉脚本执行，脚本自己下载最新源码包。
+习惯 curl 的话等价写法：`curl -fsSL https://raw.githubusercontent.com/ubui/elmsamaras/main/install.sh | sudo bash`。
+**重复执行即升级**，不会重置密码与配置。
+
+> `raw.githubusercontent.com` 被墙/解析异常时，改用 Release 通道：
+> `curl -fsSL https://github.com/ubui/elmsamaras/releases/latest/download/get.sh | sudo bash`
+
+### 一键卸载（OMV 同款风格）
+
+```sh
+wget -O - https://raw.githubusercontent.com/ubui/elmsamaras/main/uninstall.sh | sudo bash
+```
+
+卸载程序与 cron 任务、登录横幅；**配置和数据默认保留**（`/etc/nsuite`、`/var/lib/nsuite`、Samba 共享、`/srv` 数据），脚本结束时提示如何彻底清除。加 `--purge-containers` 可顺带删除面板部署的 Docker 容器（管道执行传参：`... | sudo bash -s -- --purge-containers`）。
 
 ### 局域网自建源（离线 / 内网）
 
@@ -74,18 +87,6 @@ sudo ./install.sh --without-samba # 不装 Samba
 sudo ./install.sh --port 8080     # 自定义端口
 NSUITE_BRAND="我的NAS" sudo -E ./install.sh   # 安装时自定义面板显示名
 ```
-
-### 一键卸载
-
-```sh
-curl -fsSL https://github.com/ubui/elmsamaras/releases/latest/download/uninstall.sh | sudo bash
-```
-
-局域网内另一台已装机器也可作源：`curl -fsSL http://<面板地址>:8090/uninstall.sh | sudo bash`
-
-卸载内容：停掉并删除 `nsuite.service`、`/opt/nsuite` 程序、cron 任务与登录横幅。
-**配置和数据默认保留**（`/etc/nsuite`、`/var/lib/nsuite`、Samba 共享、`/srv` 下的媒体文件），
-脚本结束时提示如何彻底清除；加 `--purge-containers` 可顺带删除面板部署的 Docker 容器。
 
 ### 其它管道用法
 

@@ -238,7 +238,7 @@ def _deliver(ch, title, body, level="info"):
             base,
             urllib.parse.quote(title),
             urllib.parse.quote(body),
-            urllib.parse.quote("elmsamaras"),
+            urllib.parse.quote("Elmsamaras"),
             "timeSensitive" if level == "error" else "active",
         )
         req = urllib.request.Request(url, headers={"User-Agent": "elmsamaras/1.0"})
@@ -262,10 +262,10 @@ def _deliver(ch, title, body, level="info"):
 
     if ctype == "smtp":
         msg = EmailMessage()
-        msg["Subject"] = "[elmsamaras] " + title
+        msg["Subject"] = "[Elmsamaras] " + title
         msg["From"] = ch.get("sender") or ch.get("user") or "elmsamaras@localhost"
         msg["To"] = ch.get("to", "")
-        msg.set_content(body + "\n\n-- \nelmsamaras · %s" %
+        msg.set_content(body + "\n\n-- \nElmsamaras · %s" %
                         (os.uname().nodename if hasattr(os, "uname") else ""))
         host = ch.get("host", "")
         port = int(ch.get("port") or 587)
