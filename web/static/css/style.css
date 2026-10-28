@@ -404,21 +404,18 @@ footer > a {
     border-top: 1px solid #63615e !important;
 }
 
-.main > .main-left > .nav > .slide > .slide-menu.active > li,
-.main > .main-left > .nav > .slide.open > .slide-menu > li {
+.main > .main-left > .nav > .slide > .slide-menu.active > li {
     padding-left: 2rem;
     border-top: 1px solid #4c4b48;
     border-bottom: 1px solid #0f0e0a;
     background: #3f3e3a url("../img/noise.png") repeat;
 }
 
-.main > .main-left > .nav > .slide > .slide-menu.active > li:nth-last-child(1),
-.main > .main-left > .nav > .slide.open > .slide-menu > li:nth-last-child(1) {
+.main > .main-left > .nav > .slide > .slide-menu.active > li:nth-last-child(1) {
     border-bottom: none;
 }
 
-.main > .main-left > .nav > .slide > .slide-menu.active > li:hover,
-.main > .main-left > .nav > .slide.open > .slide-menu > li:hover {
+.main > .main-left > .nav > .slide > .slide-menu.active > li:hover {
     background: rgba(117, 137, 12, 0.45) !important;
     border-top: 1px solid rgba(129, 140, 72, 0.45);
 }

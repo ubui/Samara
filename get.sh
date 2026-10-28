@@ -1,6 +1,6 @@
 #!/bin/sh
 # =============================================================================
-# elmsamaras 一键安装引导器
+# samara 一键安装引导器
 #
 #   curl -fsSL http://<面板地址>:8090/get.sh | sudo bash
 #   curl -fsSL http://<面板地址>:8090/get.sh | sudo bash -s -- --full
@@ -11,7 +11,7 @@
 # =============================================================================
 set -eu
 
-REPO='ubui/elmsamaras'
+REPO='ubui/Samara'
 GH_BASE="https://github.com/$REPO/releases/latest/download"
 
 # 面板分发时注入；保留 @@ 表示未注入（GitHub / 本地直接运行）
@@ -19,14 +19,14 @@ BASE='@@BASE_URL@@'
 VERSION='@@VERSION@@'
 LAYOUT=dist        # dist=<base>/dist/<pkg>（面板/自建源）  flat=<base>/<pkg>（GitHub Release）
 
-PKG_PREFIX="elmsamaras"
+PKG_PREFIX="samara"
 
 usage() {
   cat <<'EOF'
-elmsamaras 一键安装引导器
+samara 一键安装引导器
 
 用法:
-  curl -fsSL https://github.com/ubui/elmsamaras/releases/latest/download/get.sh | sudo bash
+  curl -fsSL https://github.com/ubui/Samara/releases/latest/download/get.sh | sudo bash
   curl -fsSL http://<面板>:8090/get.sh | sudo bash        # 局域网自建源
 
 自身选项（必须写在最前面）:
@@ -75,7 +75,7 @@ case "$BASE" in
 esac
 
 if [ "$LAYOUT" = flat ]; then
-  # GitHub Release：不带版本号的 elmsamaras.tar.gz 恒指向最新版
+  # GitHub Release：不带版本号的 samara.tar.gz 恒指向最新版
   VERSION="${VERSION:-latest}"
   if [ "$VERSION" = latest ]; then
     PKG="${PKG_PREFIX}.tar.gz"
@@ -89,7 +89,7 @@ else
     case "$BASE" in
       file://*)
         _hit=$(ls -1 "${BASE#file://}"/dist/${PKG_PREFIX}-*.tar.gz 2>/dev/null \
-               | grep -v -- '-install\.sh$' | sed 's/.*elmsamaras-//; s/\.tar\.gz$//' \
+               | grep -v -- '-install\.sh$' | sed 's/.*samara-//; s/\.tar\.gz$//' \
                | sort -V | tail -1)
         [ -n "${_hit:-}" ] && VERSION="$_hit"
         ;;
@@ -101,12 +101,12 @@ else
 fi
 
 say "=============================================="
-say " elmsamaras ${VERSION} 一键安装"
+say " samara ${VERSION} 一键安装"
 say "=============================================="
 say "源码包: $URL"
 
-if [ -f /opt/nsuite/nsuite/__init__.py ]; then
-  _old=$(sed -n 's/^__version__ = "\([^"]*\)".*/\1/p' /opt/nsuite/nsuite/__init__.py 2>/dev/null | head -1)
+if [ -f /opt/samara/samara/__init__.py ]; then
+  _old=$(sed -n 's/^__version__ = "\([^"]*\)".*/\1/p' /opt/samara/samara/__init__.py 2>/dev/null | head -1)
   say "已安装: ${_old:-未知版本} → 本次为升级安装（配置与账号会保留）"
 fi
 
@@ -122,7 +122,7 @@ if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1; then
 fi
 
 # ---------- 下载 ----------
-TMPD=$(mktemp -d "${TMPDIR:-/tmp}/elmsamaras-get.XXXXXX") || die "无法创建临时目录"
+TMPD=$(mktemp -d "${TMPDIR:-/tmp}/samara-get.XXXXXX") || die "无法创建临时目录"
 trap 'rm -rf "$TMPD"' EXIT INT TERM
 
 say "[*] 下载中 ..."
@@ -147,7 +147,7 @@ SRCDIR=""
 for _cand in "$TMPD"/*/install.sh "$TMPD"/install.sh; do
   [ -f "$_cand" ] || continue
   _dir=$(dirname "$_cand")
-  if [ -f "$_dir/nsuite/__init__.py" ]; then SRCDIR=$_dir; break; fi
+  if [ -f "$_dir/samara/__init__.py" ]; then SRCDIR=$_dir; break; fi
 done
 [ -n "$SRCDIR" ] || die "包里没有找到 install.sh"
 
